@@ -150,7 +150,7 @@ func SnicHandler(w http.ResponseWriter, r *http.Request) {
 		ns_path := fmt.Sprintf("/proc/%d/ns/net", pid_d)
 		fmt.Println(ns_path)
 
-		command4 := fmt.Sprintf("cd /home/appleuser/smartnic_cni_plugin && sudo CNI_COMMAND=ADD CNI_NETNS=%s CONTAINER_NAME=%s CNI_IFNAME=veth1 CNI_PATH=%s CNI_CONTAINERID=%d go run listen_req.go connect_reg.go snic.go < dock.conf", ns_path, container_name, ns_path, pid_d)
+		command4 := fmt.Sprintf("cd /home/%s/smartnic_cni_plugin && sudo CNI_COMMAND=ADD CNI_NETNS=%s CONTAINER_NAME=%s CNI_IFNAME=veth1 CNI_PATH=%s CNI_CONTAINERID=%d go run listen_req.go connect_reg.go snic.go < dock.conf",usr.Username, ns_path, container_name, ns_path, pid_d)
 		output_4, err := session_and_command(command4, client)
 		if err != nil {
 			fmt.Println("unable to create session or execute command:", err)
