@@ -3,6 +3,7 @@ package snic
 import (
 	"encoding/json"
 	"fmt"
+	"os/user"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -78,8 +79,14 @@ func SnicHandler(w http.ResponseWriter, r *http.Request) {
 
 	for container_name, service := range services_no_mysql {
 		fmt.Printf("Service Name: %s, IP: %s, Node: %s\n", container_name, service.IP, service.Node)
+		usr, err := user.Current()
+    		if err != nil {
+			fmt.Println("unable to get user:%s")
+			return
+    		}
+		filePath := fmt.Sprintf("%s/.ssh/id_ed25519", usr.HomeDir)
 		// 秘密鍵を読み込む
-		key, err := ioutil.ReadFile("/home/appleuser/.ssh/id_ed25519")
+		key, err := ioutil.ReadFile(filePath)
 		if err != nil {
 			fmt.Println("unable to read private key:", err)
 			return
@@ -94,7 +101,7 @@ func SnicHandler(w http.ResponseWriter, r *http.Request) {
 
 		// SSHクライアント設定
 		config := &ssh.ClientConfig{
-			User: "appleuser",
+			User: usr.Username,
 			Auth: []ssh.AuthMethod{
 				ssh.PublicKeys(signer),
 			},
@@ -179,8 +186,18 @@ func SnicDelHandler(w http.ResponseWriter, r *http.Request) {
 
         for container_name, service := range services {
                 fmt.Printf("Service Name: %s, IP: %s, Node: %s\n", container_name, service.IP, service.Node)
-                // 秘密鍵を読み込む
-                key, err := ioutil.ReadFile("/home/appleuser/.ssh/id_ed25519")
+                usr, err := user.Current()
+    		if err != nil {
+			fmt.Println("unable to get user:%s",err)
+			return
+    		}
+
+    		// ユーザーのホームディレクトリにあるSSHキーのパスを作成
+    		filePath := fmt.Sprintf("%s/.ssh/id_ed25519", usr.HomeDir)
+
+    		// ファイルを読み込む
+    		key, err := ioutil.ReadFile(filePath)
+		// 秘密鍵を読み込む
                 if err != nil {
                         fmt.Println("unable to read private key:", err)
                         return
@@ -195,7 +212,7 @@ func SnicDelHandler(w http.ResponseWriter, r *http.Request) {
 
 		// SSHクライアント設定
                 config := &ssh.ClientConfig{
-                        User: "appleuser",
+                        User: usr.Username,
                         Auth: []ssh.AuthMethod{
                                 ssh.PublicKeys(signer),
                         },

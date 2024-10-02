@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-
+	"os/user"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -34,8 +34,14 @@ func setup_container(container_name string, service ServiceInfo, dnsOptionString
 		fmt.Printf("Service Name: %s, IP: %s, Node: %s\n", container_name, service.IP, service.Node)
 		parts := strings.Split(service.IP, ".")
 		lastPart := parts[len(parts)-1]
+
+		usr, err := user.Current()
+    		if err != nil {
+			return fmt.Errorf("unable to get user:%s", err)
+    		}
+		filePath := fmt.Sprintf("%s/.ssh/id_ed25519", usr.HomeDir)
 		// 秘密鍵を読み込む
-		key, err := ioutil.ReadFile("/home/appleuser/.ssh/id_ed25519")
+		key, err := ioutil.ReadFile(filePath)
 		if err != nil {
 			//fmt.Println("unable to read private key:", err)
 	 		return fmt.Errorf("unable to read private key:%s", err)
@@ -50,7 +56,7 @@ func setup_container(container_name string, service ServiceInfo, dnsOptionString
 
 		// SSHクライアント設定
 		config := &ssh.ClientConfig{
-			User: "appleuser",
+			User: usr.Username,
 			Auth: []ssh.AuthMethod{
 				ssh.PublicKeys(signer),
 			},
@@ -447,9 +453,14 @@ func ProxyLessDeleteHandler(w http.ResponseWriter, r *http.Request) {
 
 	for container_name, service := range services {
 		fmt.Printf("Service Name: %s, IP: %s, Node: %s\n", container_name, service.IP, service.Node)
-
+		usr, err := user.Current()
+    		if err != nil {
+			fmt.Println("unable to get user:%s", err)
+			return
+    		}
 		// 秘密鍵を読み込む
-		key, err := ioutil.ReadFile("/home/appleuser/.ssh/id_ed25519")
+		filePath := fmt.Sprintf("%s/.ssh/id_ed25519", usr.HomeDir)
+		key, err := ioutil.ReadFile(filePath)
 		if err != nil {
 			fmt.Println("unable to read private key:", err)
 			return
@@ -464,7 +475,7 @@ func ProxyLessDeleteHandler(w http.ResponseWriter, r *http.Request) {
 
 		// SSHクライアント設定
 		config := &ssh.ClientConfig{
-			User: "appleuser",
+			User: usr.Username,
 			Auth: []ssh.AuthMethod{
 				ssh.PublicKeys(signer),
 			},

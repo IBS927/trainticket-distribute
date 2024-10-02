@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os/user"
 	"net/http"
 	"strings"
 	"strconv"
@@ -89,7 +90,17 @@ func Envoy_Run_Handler(w http.ResponseWriter, r *http.Request) {
 		n_envoy := n+100
 		IP_envoy := fmt.Sprintf("%s.%s.%s.%d",parts[0],parts[1],parts[2],n_envoy)
 		// 秘密鍵を読み込む
-		key, err := ioutil.ReadFile("/home/appleuser/.ssh/id_ed25519")
+		usr, err := user.Current()
+   		if err != nil {
+         		fmt.Println("unable to get user:%s",err)
+			return
+		}
+
+    		// ユーザーのホームディレクトリにあるSSHキーのパスを作成
+    		filePath := fmt.Sprintf("%s/.ssh/id_ed25519", usr.HomeDir)
+
+    		// ファイルを読み込む
+    		key, err := ioutil.ReadFile(filePath)
 		if err != nil {
 			fmt.Println("unable to read private key:", err)
 			return
@@ -104,7 +115,7 @@ func Envoy_Run_Handler(w http.ResponseWriter, r *http.Request) {
 
 		// SSHクライアント設定
 		config := &ssh.ClientConfig{
-			User: "appleuser",
+			User: usr.Username,
 			Auth: []ssh.AuthMethod{
 				ssh.PublicKeys(signer),
 			},
@@ -339,7 +350,16 @@ func Envoy_Del_Handler(w http.ResponseWriter, r *http.Request) {
         for container_name, service := range services {
                 fmt.Printf("ServiceName: %s, IP: %s, Node: %s\n", container_name, service.IP, service.Node)
 		// 秘密鍵を読み込む
-                key, err := ioutil.ReadFile("/home/appleuser/.ssh/id_ed25519")
+		usr, err := user.Current()
+    		if err != nil {
+			fmt.Println("unable to get user:%s",err)
+    		}
+
+    		// ユーザーのホームディレクトリにあるSSHキーのパスを作成
+    		filePath := fmt.Sprintf("%s/.ssh/id_ed25519", usr.HomeDir)
+
+    		// ファイルを読み込む
+    		key, err := ioutil.ReadFile(filePath)
                 if err != nil {
                         fmt.Println("unable to read private key:", err)
                         return
@@ -354,7 +374,7 @@ func Envoy_Del_Handler(w http.ResponseWriter, r *http.Request) {
 
                 // SSHクライアント設定
                 config := &ssh.ClientConfig{
-                        User: "appleuser",
+                        User: usr.Username,
                         Auth: []ssh.AuthMethod{
                                 ssh.PublicKeys(signer),
                         },
