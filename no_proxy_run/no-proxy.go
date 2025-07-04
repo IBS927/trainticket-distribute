@@ -73,14 +73,14 @@ func setup_container(container_name string, service ServiceInfo, dnsOptionString
 		defer client.Close()
 
 		// コマンドを実行
-		command1 := fmt.Sprintf("sudo docker pull kawanotatsuya/%s", container_name)
+		/*command1 := fmt.Sprintf("sudo docker pull kawanotatsuya/%s", container_name)
 		output, err := session_and_command(command1, client)
 		if err != nil {
 			fmt.Println("unable to create session or execute command:", err)
 			return fmt.Errorf("unable to create session or execute command:%s", err)
 		}
 		fmt.Println(string(output))
-
+		*/
 		command2 := fmt.Sprintf("sudo docker run --restart unless-stopped --network none %s --name %s -d kawanotatsuya/%s",dnsOptionString, container_name, container_name)
 		output_2, err := session_and_command(command2, client)
 		if err != nil {

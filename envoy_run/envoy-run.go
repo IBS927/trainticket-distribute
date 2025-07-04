@@ -130,15 +130,15 @@ func Envoy_Run_Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer client.Close()
-
-		command1 := fmt.Sprintf("sudo docker pull kawanotatsuya/%s_trace", container_name)
+		/*
+		command1 := fmt.Sprintf("sudo docker pull kawanotatsuya/%s", container_name)
 		output_1, err := session_and_command(command1, client)
 		if err != nil {
 			fmt.Println("unable to create session or execute command:", err)
 			return
 		}
 		fmt.Println(string(output_1))
-
+		
 		command2 := fmt.Sprintf("sudo docker pull kawanotatsuya/%s_envoy", container_name)
 		output_2, err := session_and_command(command2, client)
 		if err != nil {
@@ -146,8 +146,8 @@ func Envoy_Run_Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		fmt.Println(string(output_2))
-
-		command3 := fmt.Sprintf("sudo docker run --network none %s --name %s -d kawanotatsuya/%s_trace",dnsOptionString, container_name, container_name)
+		*/
+		command3 := fmt.Sprintf("sudo docker run --network none %s -e JAVA_OPTS=-Xmx2g --name %s -d kawanotatsuya/%s",dnsOptionString, container_name, container_name)
 		output_3, err := session_and_command(command3, client)
 		if err != nil {
 			fmt.Println("unable to create session or execute command:", err)

@@ -15,6 +15,7 @@ type ServiceInfo struct {
 	IP   string `json:"ip"`
 	Node string `json:"node"`
 	Port string `json:"port"`
+	Core string `json:"core"`
 }
 
 func session_and_command(command string, client *ssh.Client) ([]byte, error) {
@@ -118,14 +119,14 @@ func SnicHandler(w http.ResponseWriter, r *http.Request) {
 		defer client.Close()
 
 		// コマンドを実行
-		//command1 := fmt.Sprintf("sudo docker pull kawanotatsuya/%s_trace", container_name)
-		//output, err := session_and_command(command1, client)
-		//if err != nil {
-		//	fmt.Println("unable to create session or execute command:", err)
-		//	return
-		//}
-		//fmt.Println(string(output))
-
+		/*command1 := fmt.Sprintf("sudo docker pull kawanotatsuya/%s", container_name)
+		output, err := session_and_command(command1, client)
+		if err != nil {
+			fmt.Println("unable to create session or execute command:", err)
+			return
+		}
+		fmt.Println(string(output))
+		*/
 		command2 := fmt.Sprintf("sudo docker run --network none %s --name %s -d kawanotatsuya/%s",dnsOptionString, container_name, container_name)
 		output_2, err := session_and_command(command2, client)
 		if err != nil {
@@ -150,7 +151,7 @@ func SnicHandler(w http.ResponseWriter, r *http.Request) {
 		ns_path := fmt.Sprintf("/proc/%d/ns/net", pid_d)
 		fmt.Println(ns_path)
 
-		command4 := fmt.Sprintf("cd /home/%s/smartnic_cni_plugin && sudo CNI_COMMAND=ADD CNI_NETNS=%s CONTAINER_NAME=%s CNI_IFNAME=veth1 CNI_PATH=%s CNI_CONTAINERID=%d go run listen_req.go connect_reg.go snic.go < dock.conf",usr.Username, ns_path, container_name, ns_path, pid_d)
+		command4 := fmt.Sprintf("cd /home/%s/smartnic_cni_plugin && sudo CNI_COMMAND=ADD CNI_NETNS=%s CONTAINER_NAME=%s CNI_IFNAME=veth1 CNI_CORE=%s CNI_PATH=%s CNI_CONTAINERID=%d go run listen_req.go connect_reg.go snic.go < dock.conf",usr.Username,ns_path, container_name, service.Core, ns_path, pid_d)
 		output_4, err := session_and_command(command4, client)
 		if err != nil {
 			fmt.Println("unable to create session or execute command:", err)
