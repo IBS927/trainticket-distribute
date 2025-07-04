@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
-
+	ambient "github.com/IBS927/distributed_setting/ambient"
 	"github.com/IBS927/distributed_setting/envoy_run"
 	proxy_less "github.com/IBS927/distributed_setting/no_proxy_run"
 	snic "github.com/IBS927/distributed_setting/snic_run"
@@ -18,6 +18,9 @@ func main() {
 	http.HandleFunc("/no_proxy_del", proxy_less.ProxyLessDeleteHandler)
 	http.HandleFunc("/snic", snic.SnicHandler)
 	http.HandleFunc("/snic_del",snic.SnicDelHandler)
+	http.HandleFunc("/ambient",ambient.AmbientHandler)
+	http.HandleFunc("/snic_ambient",ambient.SnicAmbientHandler)
+	http.HandleFunc("/ambient_del",ambient.AmbientDeleteHandler)
 	fmt.Println("Server starting on port 8080...")
 	http.ListenAndServe(":8080", nil)
 }
