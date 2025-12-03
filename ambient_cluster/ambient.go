@@ -286,7 +286,7 @@ func SnicAmbientHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         // Ambient Proxy 情報取得
-        response, err := http.Get("http://localhost:8000/snic_ambient")
+        response, err := http.Get("http://localhost:8000/snic_ambient_cluster")
         if err != nil {
                 fmt.Println("Error fetching URL:", err)
                 return

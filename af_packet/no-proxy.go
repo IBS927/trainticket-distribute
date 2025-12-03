@@ -81,15 +81,15 @@ func setup_container(container_name string, service ServiceInfo, dnsOptionString
 			return fmt.Errorf("unable to create session or execute command:%s", err)
 		}
 		fmt.Println(string(output))
-		*/
-		command2 := fmt.Sprintf("sudo docker run --restart unless-stopped --network none %s --name %s -d kawanotatsuya/%s",dnsOptionString, container_name, container_name)
+		
+		command2 := fmt.Sprintf("sudo docker run --restart unless-stopped --cap-add=NET_RAW --network none %s --name %s -d kawanotatsuya/%s -v eth%s",dnsOptionString, container_name, container_name, lastPart)
 		output_2, err := session_and_command(command2, client)
 		if err != nil {
 			//fmt.Println("unable to create session or execute command:", err)
 			return fmt.Errorf("unable to create session or execute command:%s", err)
 		}
 		fmt.Println(string(output_2))
-
+		*/
 		command3 := fmt.Sprintf("sudo ip link add veth%s type veth peer name eth%s", lastPart, lastPart)
 		output_3, err := session_and_command(command3, client)
 		if err != nil {
@@ -97,6 +97,14 @@ func setup_container(container_name string, service ServiceInfo, dnsOptionString
 			return fmt.Errorf("unable to cretae session or execute command:%s", err)
 		}
 		fmt.Println(string(output_3))
+
+		command2 := fmt.Sprintf("sudo docker run --restart unless-stopped --cap-add=NET_RAW --network none %s --name %s -d kawanotatsuya/%s -v eth%s",dnsOptionString, container_name, container_name, lastPart)
+                output_2, err := session_and_command(command2, client)
+                if err != nil {
+                        //fmt.Println("unable to create session or execute command:", err)
+                        return fmt.Errorf("unable to create session or execute command:%s", err)
+                }
+                fmt.Println(string(output_2))
 
 		command4 := fmt.Sprintf("echo $(sudo docker inspect -f '{{.State.Pid}}' %s)", container_name)
 		pid, err := session_and_command(command4, client)
