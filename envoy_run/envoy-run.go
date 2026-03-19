@@ -429,5 +429,13 @@ func Envoy_Del_Handler(w http.ResponseWriter, r *http.Request) {
 
                 }
                 fmt.Println(string(output_5))
+
+		command6 := "sudo nft flush chain ip nat prerouting"
+                output_6, err := session_and_command(command6, client)
+                if err != nil {
+                        fmt.Println("unable to create session or execute command:", err)
+
+                }
+                fmt.Println(string(output_6))
 	}
 }

@@ -99,7 +99,7 @@ func setup_container(container_name string, service ServiceInfo, dnsOptionString
 		fmt.Println(string(output_3))
 
 
-		command2 := fmt.Sprintf("sudo docker run --restart unless-stopped --cap-add=NET_RAW --network none %s --name %s -d kawanotatsuya/%s -p veth%s",dnsOptionString, container_name, container_name, lastPart)
+		command2 := fmt.Sprintf("sudo docker run --restart unless-stopped --cap-add=NET_RAW --network none %s --name %s -d -e UDPWRAP_DEBUG=1 -e UDPWRAP_SKIP_MAIN_DRAIN=1 -e UDPWRAP_FANOUT=LB -e UDPWRAP_IFACE=veth%s -e UDPWRAP_IFACE_WAIT_MS=5000 kawanotatsuya/%s",dnsOptionString, container_name,lastPart, container_name)
                 output_2, err := session_and_command(command2, client)
                 if err != nil {
                         //fmt.Println("unable to create session or execute command:", err)

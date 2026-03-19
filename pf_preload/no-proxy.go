@@ -32,8 +32,8 @@ func session_and_command(command string, client *ssh.Client) ([]byte, error) {
 
 func setup_container(container_name string, service ServiceInfo, dnsOptionString string)(error){
 		fmt.Printf("Service Name: %s, IP: %s, Node: %s\n", container_name, service.IP, service.Node)
-		parts := strings.Split(service.IP, ".")
-		lastPart := parts[len(parts)-1]
+		//parts := strings.Split(service.IP, ".")
+		//lastPart := parts[len(parts)-1]
 
 		usr, err := user.Current()
     		if err != nil {
@@ -81,15 +81,15 @@ func setup_container(container_name string, service ServiceInfo, dnsOptionString
 			return fmt.Errorf("unable to create session or execute command:%s", err)
 		}
 		fmt.Println(string(output))
-		
-		command2 := fmt.Sprintf("sudo docker run --restart unless-stopped --cap-add=NET_RAW --network none %s --name %s -d kawanotatsuya/%s -v eth%s",dnsOptionString, container_name, container_name, lastPart)
+		*/
+		command2 := fmt.Sprintf("sudo docker run --restart unless-stopped --cap-add=NET_RAW --network none %s --name %s -d -e UDPWRAP_DEBUG=1 -e UDPWRAP_IFACE=enp2s0f1 -e L2_PACKET_PIN_THREADS=1 -e UDPWRAP_IFACE_WAIT_MS=5000 kawanotatsuya/%s",dnsOptionString, container_name, container_name)
 		output_2, err := session_and_command(command2, client)
 		if err != nil {
 			//fmt.Println("unable to create session or execute command:", err)
 			return fmt.Errorf("unable to create session or execute command:%s", err)
 		}
 		fmt.Println(string(output_2))
-		*/
+		/*
 		command3 := fmt.Sprintf("sudo ip link add veth%s type veth peer name eth%s", lastPart, lastPart)
 		output_3, err := session_and_command(command3, client)
 		if err != nil {
@@ -106,7 +106,7 @@ func setup_container(container_name string, service ServiceInfo, dnsOptionString
                         return fmt.Errorf("unable to create session or execute command:%s", err)
                 }
                 fmt.Println(string(output_2))
-
+		*/
 		command4 := fmt.Sprintf("echo $(sudo docker inspect -f '{{.State.Pid}}' %s)", container_name)
 		pid, err := session_and_command(command4, client)
 		if err != nil {
@@ -123,7 +123,7 @@ func setup_container(container_name string, service ServiceInfo, dnsOptionString
 
 		ns_path := fmt.Sprintf("/proc/%d/ns/net", pid_d)
 		fmt.Println(ns_path)
-		command5 := fmt.Sprintf("sudo ip link set veth%s netns %d", lastPart, pid_d)
+		command5 := fmt.Sprintf("sudo ip link set enp2s0f1 netns %d",  pid_d)
 		output_5, err := session_and_command(command5, client)
 		if err != nil {
 			//fmt.Println("unable to create session or execute command:", err)
@@ -131,15 +131,15 @@ func setup_container(container_name string, service ServiceInfo, dnsOptionString
 		}
 		fmt.Println(string(output_5))
 
-		/*command6 := fmt.Sprintf("sudo nsenter -t %d -n ip addr add %s/24 dev veth%s", pid_d, service.IP, lastPart)
+		command6 := fmt.Sprintf("sudo nsenter -t %d -n ip addr add %s/24 dev enp2s0f1", pid_d, service.IP)
 		output_6, err := session_and_command(command6, client)
 		if err != nil {
 			//fmt.Println("unable to create session or execute command:", err)
 			return fmt.Errorf("unable to create session or execute command:%s", err)
 		}
 		fmt.Println(string(output_6))
-		*/
-		command7 := fmt.Sprintf("sudo nsenter -t %d -n ip link set veth%s up", pid_d, lastPart)
+		
+		command7 := fmt.Sprintf("sudo nsenter -t %d -n ip link set enp2s0f1 up", pid_d)
 		output_7, err := session_and_command(command7, client)
 		if err != nil {
 			//fmt.Println("unable to create session or execute command:", err)
@@ -147,7 +147,7 @@ func setup_container(container_name string, service ServiceInfo, dnsOptionString
 		}
 		fmt.Println(string(output_7))
 
-		command8 := fmt.Sprintf("sudo ip link set eth%s master my_bridge", lastPart)
+		/*command8 := fmt.Sprintf("sudo ip link set eth%s master my_bridge", lastPart)
 		output_8, err := session_and_command(command8, client)
 		if err != nil {
 			//fmt.Println("unable to create session or execute command:", err)
@@ -162,6 +162,7 @@ func setup_container(container_name string, service ServiceInfo, dnsOptionString
 			return fmt.Errorf("unable to create session or execute command:%s", err)
 		}
 		fmt.Println(string(output_9))
+		*/
 		return nil
 	
 }
